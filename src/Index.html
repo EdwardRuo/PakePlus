@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天然源面波测站翻滚对应位置推测工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.8;
+            font-size: 14px;
+        }
+
+        .toolbar {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #1e7e34;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+            transform: translateY(-2px);
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-section h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+
+        .control-section {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .form-control {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        .navigation-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .nav-btn {
+            padding: 5px 10px;
+            border: 1px solid #6c757d;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #6c757d;
+            color: white;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .table-section {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #2c3e50;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .time-calc-section {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .time-calc-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .time-output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #2c3e50;
+            min-height: 50px;
+            white-space: pre-wrap;
+        }
+
+        .status-bar {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .close {
+            font-size: 24px;
+            cursor: pointer;
+            color: #6c757d;
+        }
+
+        .close:hover {
+            color: #dc3545;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .current-arrangement-info {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            color: #1565c0;
+            font-weight: bold;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+
+            .control-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+
+            .form-row .form-group {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>天然源面波测站翻滚对应位置推测工具</h1>
+            <p>版本 2.1 - 增强版</p>
+        </div>
+
+        <div class="toolbar">
+            <button class="btn btn-primary" onclick="showNewProjectModal()">新建工程</button>
+            <button class="btn btn-success" onclick="loadProject()">导入工程</button>
+            <button class="btn btn-secondary" onclick="exportProject()">导出工程</button>
+        </div>
+
+        <div class="content">
+            <div class="info-section">
+                <h3>工程信息</h3>
+                <div id="projectInfo" class="info-grid">
+                    <div class="info-item">请先创建或导入工程</div>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <div class="control-row">
+                    <div class="form-group">
+                        <label>测量排列:</label>
+                        <select id="arrangementSelect" class="form-control" onchange="switchArrangement()" style="width: 150px;">
+                            <option value="">请选择排列</option>
+                        </select>
+                    </div>
+                    <div class="navigation-buttons">
+                        <button class="nav-btn" onclick="firstArrangement()" id="firstBtn"><<</button>
+                        <button class="nav-btn" onclick="previousArrangement()" id="prevBtn"><</button>
+                        <button class="nav-btn" onclick="nextArrangement()" id="nextBtn">></button>
+                        <button class="nav-btn" onclick="lastArrangement()" id="lastBtn">>></button>
+                    </div>
+                    <button class="btn btn-success" onclick="addArrangement()">添加排列</button>
+                    <button class="btn btn-danger" onclick="removeArrangement()">删除排列</button>
+                </div>
+                
+                <div id="currentArrangementInfo" class="current-arrangement-info" style="display: none;"></div>
+                
+                <div class="export-buttons">
+                    <button class="btn btn-info" onclick="exportCurrentArrangementImage()">导出当前排列图片</button>
+                    <button class="btn btn-warning" onclick="exportAllArrangementsImages()">导出所有排列图片</button>
+                </div>
+            </div>
+
+            <div class="time-calc-section">
+                <h3>采集时间参数计算</h3>
+                <div class="time-calc-row">
+                    <div class="form-group">
+                        <label>起始时间:</label>
+                        <input type="time" id="startTime" class="form-control" style="width: 120px;" value="12:00">
+                    </div>
+                    <div class="form-group">
+                        <label>采集时长(分钟):</label>
+                        <input type="number" id="duration" class="form-control" style="width: 120px;" value="40" min="1">
+                    </div>
+                    <button class="btn btn-primary" onclick="calculateTimeParameters()">计算参数</button>
+                </div>
+                <div class="time-output" id="timeOutput">请输入起始时间和采集时长，然后点击计算参数</div>
+            </div>
+
+            <div class="table-section">
+                <h3>测站与测点对应关系</h3>
+                <div class="table-container">
+                    <table id="resultTable">
+                        <thead>
+                            <tr>
+                                <th>顺序</th>
+                                <th>测站号</th>
+                                <th>测点点号</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td colspan="3">请先创建工程并添加排列</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <span id="statusText">就绪</span>
+        </div>
+    </div>
+
+    <!-- 新建工程模态框 -->
+    <div id="newProjectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">新建工程</h3>
+                <span class="close" onclick="closeModal('newProjectModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="projectForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="projectName">工程名:</label>
+                            <input type="text" id="projectName" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="stationCount">测站个数:</label>
+                            <input type="number" id="stationCount" class="form-control" min="1" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="combinedStations">组合测站个数:</label>
+                            <input type="number" id="combinedStations" class="form-control" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="spacing">道间距:</label>
+                            <input type="number" id="spacing" class="form-control" step="0.1" min="0.1" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>方向:</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="direction" value="true" checked> 正向</label>
+                                <label><input type="radio" name="direction" value="false"> 反向</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="startPoint">测点起始点号:</label>
+                            <input type="number" id="startPoint" class="form-control" step="0.1" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pointIncrement">测点点号增量:</label>
+                            <input type="number" id="pointIncrement" class="form-control" step="0.1" value="1" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('newProjectModal')">取消</button>
+                <button type="button" class="btn btn-primary" onclick="createProject()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentProject = null;
+        let currentArrangements = [];
+        let currentArrangementIndex = 0;
+
+        // 工程数据结构
+        class Project {
+            constructor(name, stationCount, combinedStations, spacing, isForward, startPoint, pointIncrement) {
+                this.name = name;
+                this.stationCount = stationCount;
+                this.combinedStations = combinedStations;
+                this.spacing = spacing;
+                this.isForward = isForward;
+                this.startPoint = startPoint;
+                this.pointIncrement = pointIncrement;
+            }
+        }
+
+        class Arrangement {
+            constructor(number, rollingCount, stationMapping) {
+                this.number = number;
+                this.rollingCount = rollingCount;
+                this.stationMapping = stationMapping;
+            }
+        }
+
+        // 计算引擎
+        class CalculationEngine {
+            calculateRollingStations(project) {
+                return project.stationCount - project.combinedStations + 1;
+            }
+
+            getStationOrder(project, arrangementNum) {
+                const rollingCount = arrangementNum - 1;
+                const rollingStations = this.calculateRollingStations(project);
+                const initialOrder = Array.from({length: project.stationCount}, (_, i) => i + 1);
+                
+                if (rollingCount === 0) {
+                    return initialOrder;
+                }
+
+                const rollPosition = (rollingCount * rollingStations) % project.stationCount;
+                return [...initialOrder.slice(rollPosition), ...initialOrder.slice(0, rollPosition)];
+            }
+
+            calculateRollingPositions(project, arrangementNum) {
+                const rollingCount = arrangementNum - 1;
+                const rollingStations = this.calculateRollingStations(project);
+                const stationOrder = this.getStationOrder(project, arrangementNum);
+
+                let startPoint;
+                if (project.isForward) {
+                    startPoint = project.startPoint + rollingCount * rollingStations * project.spacing;
+                } else {
+                    startPoint = project.startPoint - rollingCount * rollingStations * project.spacing;
+                }
+
+                return this.generateStationMapping(startPoint, project, stationOrder);
+            }
+
+            generateStationMapping(startPoint, project, stationOrder) {
+                const mapping = {};
+                
+                for (let i = 0; i < stationOrder.length; i++) {
+                    const stationNum = stationOrder[i];
+                    let pointPosition;
+                    
+                    if (project.isForward) {
+                        pointPosition = startPoint + i * project.spacing;
+                    } else {
+                        pointPosition = startPoint - i * project.spacing;
+                    }
+                    
+                    mapping[stationNum] = pointPosition;
+                }
+                
+                return mapping;
+            }
+
+            calculateArrangement(project, arrangementNum) {
+                const mapping = this.calculateRollingPositions(project, arrangementNum);
+                return new Arrangement(arrangementNum, arrangementNum - 1, mapping);
+            }
+        }
+
+        // 实例化计算引擎
+        const calculationEngine = new CalculationEngine();
+
+        // 新增：图片导出功能
+        function createArrangementImage(arrangement) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+   
+             // 获取数据行数
+            const stationOrder = calculationEngine.getStationOrder(currentProject, arrangement.number);
+            const dataRowCount = stationOrder.length;
+   
+            // 动态计算画布高度
+            const headerHeight = 180;
+            const tableHeaderHeight = 40;
+            const rowHeight = 30;
+            const tableHeight = tableHeaderHeight + dataRowCount * rowHeight;
+            const padding = 100;
+            
+            canvas.width = 600;
+            canvas.height = headerHeight + tableHeight + padding;
+            
+            // 设置背景
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 标题
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 28px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`排列${arrangement.number} - 测站与测点对应关系`, canvas.width / 2, 40);
+            
+            // 工程信息
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText(`工程名: ${currentProject.name}`, 50, 80);
+            ctx.fillText(`测站个数: ${currentProject.stationCount}`, 50, 105);
+            ctx.fillText(`组合测站个数: ${currentProject.combinedStations}`, 50, 130);
+            ctx.fillText(`道间距: ${currentProject.spacing}`, 50, 155);
+            
+            // 排列信息
+            const rollingStations = calculationEngine.calculateRollingStations(currentProject);
+            ctx.fillText(`翻滚次数: ${arrangement.rollingCount}`, 450, 80);
+            ctx.fillText(`翻滚测站数: ${rollingStations}`, 450, 105);
+            ctx.fillText(`方向: ${currentProject.isForward ? '正向' : '反向'}`, 450, 130);
+            ctx.fillText(`起始点号: ${currentProject.startPoint}`, 450, 155);
+            
+            // 表格
+            const startY = headerHeight;
+            const colWidths = [120, 180, 180];
+            const colTitles = ['顺序', '测站号', '测点点号'];
+            const tableWidth = colWidths[0] + colWidths[1] + colWidths[2];
+            
+            // 表头
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(50, startY, tableWidth, tableHeaderHeight);
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(50, startY, tableWidth, tableHeaderHeight);
+            
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            let x = 50;
+            for (let i = 0; i < colTitles.length; i++) {
+                ctx.fillText(colTitles[i], x + colWidths[i] / 2, startY + 25);
+                if (i < colTitles.length - 1) {
+                    ctx.beginPath();
+                    ctx.moveTo(x + colWidths[i], startY);
+                    ctx.lineTo(x + colWidths[i], startY + tableHeaderHeight);
+                    ctx.stroke();
+                }
+                x += colWidths[i];
+            }
+            
+            // 表格数据
+            ctx.font = '14px Arial';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i < dataRowCount; i++) {
+                const y = startY + tableHeaderHeight + i * rowHeight;
+                const stationNum = stationOrder[i];
+                const pointNum = arrangement.stationMapping[stationNum];
+                
+                // 行背景
+                if (i % 2 === 1) {
+                    ctx.fillStyle = '#f8f9fa';
+                    ctx.fillRect(50, y, tableWidth, rowHeight);
+                }
+                
+                // 边框
+                ctx.strokeStyle = '#dee2e6';
+                ctx.strokeRect(50, y, tableWidth, rowHeight);
+                
+                // 数据
+                ctx.fillStyle = '#2c3e50';
+                ctx.fillText(i + 1, 50 + colWidths[0] / 2, y + 20);
+                ctx.fillText(stationNum, 50 + colWidths[0] + colWidths[1] / 2, y + 20);
+                ctx.fillText(pointNum, 50 + colWidths[0] + colWidths[1] + colWidths[2] / 2, y + 20);
+                
+                // 列分隔线
+                ctx.beginPath();
+                ctx.moveTo(50 + colWidths[0], y);
+                ctx.lineTo(50 + colWidths[0], y + rowHeight);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(50 + colWidths[0] + colWidths[1], y);
+                ctx.lineTo(50 + colWidths[0] + colWidths[1], y + rowHeight);
+                ctx.stroke();
+            }
+            
+            // 外边框
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(50, startY, tableWidth, tableHeaderHeight + dataRowCount * rowHeight);
+            
+            return canvas;
+        }
+
+        function exportCurrentArrangementImage() {
+            if (!currentProject || currentArrangements.length === 0) {
+                alert('请先创建工程并添加排列');
+                return;
+            }
+            
+            const arrangement = currentArrangements[currentArrangementIndex];
+            const canvas = createArrangementImage(arrangement);
+            
+            // 下载图片
+            const link = document.createElement('a');
+            link.download = `${currentProject.name}_排列${arrangement.number}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+            
+            updateStatus(`导出排列${arrangement.number}图片成功`);
+        }
+
+        function exportAllArrangementsImages() {
+            if (!currentProject || currentArrangements.length === 0) {
+                alert('请先创建工程并添加排列');
+                return;
+            }
+            
+            // 由于浏览器限制，我们需要逐个下载
+            let downloadCount = 0;
+            const totalCount = currentArrangements.length;
+            
+            function downloadNext() {
+                if (downloadCount >= totalCount) {
+                    updateStatus(`已导出所有${totalCount}个排列图片`);
+                    return;
+                }
+                
+                const arrangement = currentArrangements[downloadCount];
+                const canvas = createArrangementImage(arrangement);
+                
+                const link = document.createElement('a');
+                link.download = `${currentProject.name}_排列${arrangement.number}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+                
+                downloadCount++;
+                updateStatus(`正在导出第${downloadCount}/${totalCount}个排列图片...`);
+                
+                // 延迟一下避免浏览器阻止多个下载
+                setTimeout(downloadNext, 500);
+            }
+            
+            downloadNext();
+        }
+
+        // 新增：时间参数计算功能
+        function getStationRangeString(order) {
+            if (!order || order.length === 0) return '';
+
+            const ranges = [];
+            let start = order[0];
+            let prev = order[0];
+
+            for (let i = 1; i < order.length; i++) {
+                const curr = order[i];
+                if (curr !== prev + 1) {
+                    ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
+                    start = curr;
+                }
+                prev = curr;
+            }
+            ranges.push(start === prev ? `${start}` : `${start}-${prev}`);
+            return ranges.join(',');
+        }
+
+        function calculateTimeParameters() {
+            if (!currentProject || currentArrangements.length === 0) {
+                alert('请先创建工程并添加排列');
+                return;
+            }
+            
+            const startTime = document.getElementById('startTime').value;
+            const duration = parseInt(document.getElementById('duration').value);
+            
+            if (!startTime || !duration) {
+                alert('请输入起始时间和采集时长');
+                return;
+            }
+            
+            const arrangement = currentArrangements[currentArrangementIndex];
+            const stationOrder = calculationEngine.getStationOrder(currentProject, arrangement.number);
+            
+            // 计算结束时间
+            const startDate = new Date(`2000-01-01T${startTime}:00`);
+            const endDate = new Date(startDate.getTime() + duration * 60000);
+            const endTime = endDate.toTimeString().slice(0, 5);
+            
+            // 获取测站顺序范围
+            const minStation = Math.min(...stationOrder);
+            const maxStation = Math.max(...stationOrder);
+            const stationRange = getStationRangeString(stationOrder);
+            
+            // 获取测点范围
+            const pointNumbers = Object.values(arrangement.stationMapping);
+            const minPoint = Math.min(...pointNumbers);
+            const maxPoint = Math.max(...pointNumbers);
+            const pointRange = `${minPoint}-${maxPoint}`;
+            
+            // 生成输出文本
+            const output = `${startTime}-${endTime}；${stationRange}；${pointRange}`;
+            
+            document.getElementById('timeOutput').textContent = output;
+            updateStatus(`已计算排列${arrangement.number}的时间参数`);
+        }
+
+        // 模态框控制
+        function showNewProjectModal() {
+            document.getElementById('newProjectModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // 创建新工程
+        function createProject() {
+            const name = document.getElementById('projectName').value;
+            const stationCount = parseInt(document.getElementById('stationCount').value);
+            const combinedStations = parseInt(document.getElementById('combinedStations').value);
+            const spacing = parseFloat(document.getElementById('spacing').value);
+            const isForward = document.querySelector('input[name="direction"]:checked').value === 'true';
+            const startPoint = parseFloat(document.getElementById('startPoint').value);
+            const pointIncrement = parseFloat(document.getElementById('pointIncrement').value);
+
+            // 验证数据
+            if (!name) {
+                alert('工程名不能为空');
+                return;
+            }
+
+            if (combinedStations >= stationCount) {
+                alert('组合测站个数必须小于测站个数');
+                return;
+            }
+
+            // 创建工程
+            currentProject = new Project(name, stationCount, combinedStations, spacing, isForward, startPoint, pointIncrement);
+            currentArrangements = [];
+            currentArrangementIndex = 0;
+
+            // 添加第一个排列
+            addArrangement();
+
+            // 更新界面
+            updateUI();
+            closeModal('newProjectModal');
+            updateStatus(`新建工程: ${name}`);
+        }
+
+        // 添加排列
+        function addArrangement() {
+            if (!currentProject) {
+                alert('请先创建或导入工程');
+                return;
+            }
+
+            const newNumber = currentArrangements.length > 0 ? 
+                Math.max(...currentArrangements.map(arr => arr.number)) + 1 : 1;
+            
+            const newArrangement = calculationEngine.calculateArrangement(currentProject, newNumber);
+            currentArrangements.push(newArrangement);
+            
+            currentArrangementIndex = currentArrangements.length - 1;
+            updateUI();
+            updateStatus(`添加排列${newNumber}`);
+        }
+
+        // 删除排列
+        function removeArrangement() {
+            if (currentArrangements.length === 0) {
+                alert('没有可删除的排列');
+                return;
+            }
+
+            if (currentArrangements.length === 1) {
+                alert('至少需要保留一个排列');
+                return;
+            }
+
+            const removedNumber = currentArrangements[currentArrangementIndex].number;
+            currentArrangements.splice(currentArrangementIndex, 1);
+
+            // 重新编号
+            currentArrangements.forEach((arr, index) => {
+                arr.number = index + 1;
+                arr.rollingCount = index;
+            });
+
+            // 调整当前索引
+            if (currentArrangementIndex >= currentArrangements.length) {
+                currentArrangementIndex = currentArrangements.length - 1;
+            }
+
+            updateUI();
+            updateStatus(`删除排列${removedNumber}`);
+        }
+
+        // 排列导航
+        function firstArrangement() {
+            if (currentArrangements.length > 0) {
+                currentArrangementIndex = 0;
+                updateArrangementDisplay();
+            }
+        }
+
+        function previousArrangement() {
+            if (currentArrangementIndex > 0) {
+                currentArrangementIndex--;
+                updateArrangementDisplay();
+            }
+        }
+
+        function nextArrangement() {
+            if (currentArrangementIndex < currentArrangements.length - 1) {
+                currentArrangementIndex++;
+                updateArrangementDisplay();
+            }
+        }
+
+        function lastArrangement() {
+            if (currentArrangements.length > 0) {
+                currentArrangementIndex = currentArrangements.length - 1;
+                updateArrangementDisplay();
+            }
+        }
+
+        function switchArrangement() {
+            const select = document.getElementById('arrangementSelect');
+            const selectedIndex = select.selectedIndex - 1; // 减1因为第一个是空选项
+            
+            if (selectedIndex >= 0 && selectedIndex < currentArrangements.length) {
+                currentArrangementIndex = selectedIndex;
+                updateArrangementDisplay();
+            }
+        }
+
+        // 更新界面
+        function updateUI() {
+            if (!currentProject) return;
+
+            updateProjectInfo();
+            updateArrangementSelect();
+            updateArrangementDisplay();
+            updateNavigationButtons();
+        }
+
+        function updateProjectInfo() {
+            const infoDiv = document.getElementById('projectInfo');
+            infoDiv.innerHTML = `
+                <div class="info-item">工程名: ${currentProject.name}</div>
+                <div class="info-item">测站个数: ${currentProject.stationCount}</div>
+                <div class="info-item">组合测站个数: ${currentProject.combinedStations}</div>
+                <div class="info-item">道间距: ${currentProject.spacing}</div>
+                <div class="info-item">方向: ${currentProject.isForward ? '正向' : '反向'}</div>
+                <div class="info-item">起始点号: ${currentProject.startPoint}</div>
+                <div class="info-item">点号增量: ${currentProject.pointIncrement}</div>
+                <div class="info-item">测量排列个数: ${currentArrangements.length}</div>
+            `;
+        }
+
+        function updateArrangementSelect() {
+            const select = document.getElementById('arrangementSelect');
+            select.innerHTML = '<option value="">请选择排列</option>';
+            
+            currentArrangements.forEach((arr, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `排列${arr.number}`;
+                select.appendChild(option);
+            });
+
+            if (currentArrangements.length > 0) {
+                select.selectedIndex = currentArrangementIndex + 1;
+            }
+        }
+
+        function updateArrangementDisplay() {
+            updateArrangementSelect();
+            updateTable();
+            updateArrangementInfo();
+        }
+
+        function updateArrangementInfo() {
+            const infoDiv = document.getElementById('currentArrangementInfo');
+            
+            if (currentArrangements.length > 0 && currentArrangementIndex < currentArrangements.length) {
+                const arrangement = currentArrangements[currentArrangementIndex];
+                const rollingStations = calculationEngine.calculateRollingStations(currentProject);
+                
+                infoDiv.textContent = `排列${arrangement.number} - 翻滚次数: ${arrangement.rollingCount}, 翻滚测站数: ${rollingStations}`;
+                infoDiv.style.display = 'block';
+            } else {
+                infoDiv.style.display = 'none';
+            }
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            if (currentArrangements.length === 0 || currentArrangementIndex >= currentArrangements.length) {
+                const row = tbody.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 3;
+                cell.textContent = '请先创建工程并添加排列';
+                return;
+            }
+
+            const arrangement = currentArrangements[currentArrangementIndex];
+            const stationOrder = calculationEngine.getStationOrder(currentProject, arrangement.number);
+
+            stationOrder.forEach((stationNum, index) => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = index + 1;
+                row.insertCell(1).textContent = stationNum;
+                row.insertCell(2).textContent = arrangement.stationMapping[stationNum];
+            });
+        }
+
+        function updateNavigationButtons() {
+            const firstBtn = document.getElementById('firstBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const lastBtn = document.getElementById('lastBtn');
+
+            const hasArrangements = currentArrangements.length > 0;
+            const isFirst = currentArrangementIndex === 0;
+            const isLast = currentArrangementIndex === currentArrangements.length - 1;
+
+            firstBtn.disabled = !hasArrangements || isFirst;
+            prevBtn.disabled = !hasArrangements || isFirst;
+            nextBtn.disabled = !hasArrangements || isLast;
+            lastBtn.disabled = !hasArrangements || isLast;
+        }
+
+        // 导入/导出功能
+        function exportProject() {
+            if (!currentProject) {
+                alert('没有可导出的工程');
+                return;
+            }
+
+            const projectData = {
+                project: currentProject,
+                arrangements: currentArrangements
+            };
+
+            const dataStr = JSON.stringify(projectData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `${currentProject.name}.json`;
+            link.click();
+            
+            updateStatus(`导出工程: ${currentProject.name}.json`);
+        }
+
+        function loadProject() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const projectData = JSON.parse(e.target.result);
+                            
+                            // 重建对象
+                            currentProject = Object.assign(new Project(), projectData.project);
+                            currentArrangements = projectData.arrangements.map(arr => 
+                                Object.assign(new Arrangement(), arr)
+                            );
+                            currentArrangementIndex = 0;
+                            
+                            updateUI();
+                            updateStatus(`导入工程: ${file.name}`);
+                        } catch (error) {
+                            alert('导入失败: 文件格式错误');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        function updateStatus(message) {
+            document.getElementById('statusText').textContent = message;
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('就绪');
+            updateNavigationButtons();
+        });
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('newProjectModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>
